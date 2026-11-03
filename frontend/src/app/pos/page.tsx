@@ -188,7 +188,7 @@ export default function PosPage() {
           </div>
 
           {/* Product Grid (Constraint #11: 1 col @ 360, 2 cols @ 640, 3 cols @ 1024, 4 cols @ 1280) */}
-          <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+          <div className="flex-1 overflow-y-auto no-scrollbar min-h-0">
             {isLoading ? (
               <div className="flex items-center justify-center h-48 sm:h-64">
                 <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
@@ -199,7 +199,7 @@ export default function PosPage() {
                 <p className="text-slate-400 text-sm">No products found matching your search.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-3.5">
                 {products.map((product) => {
                   const cartItem = cart.find((i) => i.product.id === product.id);
                   const inCartQty = cartItem?.quantity || 0;

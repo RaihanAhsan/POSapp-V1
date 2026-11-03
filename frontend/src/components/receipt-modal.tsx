@@ -41,7 +41,7 @@ export default function ReceiptModal({ isOpen, onClose, transaction }: ReceiptMo
         </div>
 
         {/* Printable Receipt Paper Container (Scrollable) */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 font-mono text-xs bg-slate-950 text-slate-200 border-y sm:border-y-0 border-slate-800 print:bg-white print:text-black print:border-none print:p-2">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-6 font-mono text-xs bg-slate-950 text-slate-200 border-y sm:border-y-0 border-slate-800 print:bg-white print:text-black print:border-none print:p-2">
           {/* Header */}
           <div className="text-center pb-4 border-b border-dashed border-slate-700 print:border-black">
             <h2 className="text-base font-bold uppercase tracking-wider text-white print:text-black">
