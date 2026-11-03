@@ -116,8 +116,8 @@ The login screen at **[http://localhost:3000/login](http://localhost:3000/login)
 
 | Role | Email | Password | Access Privileges |
 | :--- | :--- | :--- | :--- |
-| **Admin (Owner / Manager)** | `admin@kasirku.com` | `admin123` | Executive Revenue Dashboard, Product & Inventory CRUD, Comprehensive Sales Reports, Staff User Management. |
-| **Staff (Cashier)** | `cashier@kasirku.com` | `admin123` | Register (POS): Catalog search & Barcode Scan, Cart, Fast Checkout (Cash, Card, QRIS), Printable Receipt, My Shift History. *(Strictly forbidden from Admin routes)*. |
+| **Admin (Owner / Manager)** | `admin@posv.com` | `admin123` | Executive Revenue Dashboard, Product & Inventory CRUD, Comprehensive Sales Reports, Staff User Management. |
+| **Staff (Cashier)** | `cashier@posv.com` | `admin123` | Register (POS): Catalog search & Barcode Scan, Cart, Fast Checkout (Cash, Card, QRIS), Printable Receipt, My Shift History. *(Strictly forbidden from Admin routes)*. |
 
 ---
 

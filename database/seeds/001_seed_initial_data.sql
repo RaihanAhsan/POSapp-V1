@@ -1,8 +1,8 @@
 -- Insert Seed Users if they do not exist
 INSERT INTO users (email, password_hash, name, role)
 VALUES 
-    ('admin@kasirku.com', '$2a$12$rapy4PEadRxHknxFqQWwZu0L6uc/xuhW.1UvQWkGlL7d/QfJI6Hou', 'Admin Owner', 'admin'),
-    ('cashier@kasirku.com', '$2a$12$rapy4PEadRxHknxFqQWwZu0L6uc/xuhW.1UvQWkGlL7d/QfJI6Hou', 'Sarah Cashier', 'staff')
+    ('admin@posv.com', '$2a$12$rapy4PEadRxHknxFqQWwZu0L6uc/xuhW.1UvQWkGlL7d/QfJI6Hou', 'Admin Owner', 'admin'),
+    ('cashier@posv.com', '$2a$12$rapy4PEadRxHknxFqQWwZu0L6uc/xuhW.1UvQWkGlL7d/QfJI6Hou', 'Sarah Cashier', 'staff')
 ON CONFLICT (email) DO NOTHING;
 
 -- Insert Sample Products

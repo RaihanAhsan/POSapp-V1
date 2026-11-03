@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { ShoppingBag, Lock, Mail, ArrowRight, ShieldCheck, UserCheck } from 'lucide-react';
+import { ShoppingBag, Lock, Mail, ArrowRight, ShieldCheck, UserCheck, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -83,7 +84,7 @@ export default function LoginPage() {
                   inputMode="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@kasirku.com"
+                  placeholder="admin@posv.com"
                   className="block w-full pl-11 pr-3 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition min-h-[48px]"
                 />
               </div>
@@ -98,14 +99,22 @@ export default function LoginPage() {
                   <Lock className="h-5 w-5" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="block w-full pl-11 pr-3 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition min-h-[48px]"
+                  className="block w-full pl-11 pr-12 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition min-h-[48px]"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3.5 pl-2 flex items-center text-slate-400 hover:text-slate-200 transition cursor-pointer min-w-[44px] justify-center"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
             </div>
 
@@ -133,7 +142,7 @@ export default function LoginPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <button
                 type="button"
-                onClick={() => handleQuickLogin('admin@kasirku.com', 'admin123')}
+                onClick={() => handleQuickLogin('admin@posv.com', 'admin123')}
                 className="flex items-center justify-center min-h-[48px] p-3 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 text-xs sm:text-sm font-semibold text-indigo-200 transition cursor-pointer active:scale-[0.98]"
               >
                 <ShieldCheck className="h-4 w-4 mr-2 text-indigo-400 shrink-0" />
@@ -141,7 +150,7 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickLogin('cashier@kasirku.com', 'admin123')}
+                onClick={() => handleQuickLogin('cashier@posv.com', 'admin123')}
                 className="flex items-center justify-center min-h-[48px] p-3 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-800/60 text-xs sm:text-sm font-semibold text-emerald-200 transition cursor-pointer active:scale-[0.98]"
               >
                 <UserCheck className="h-4 w-4 mr-2 text-emerald-400 shrink-0" />
