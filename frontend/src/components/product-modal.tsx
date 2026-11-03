@@ -41,7 +41,7 @@ export default function ProductModal({
     } else {
       setSku('');
       setName('');
-      setPrice(10000);
+      setPrice(5);
       setStock(20);
       setIsActive(true);
     }
@@ -155,13 +155,13 @@ export default function ProductModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                Unit Price (IDR)
+                Unit Price ($ USD)
               </label>
               <input
                 type="number"
                 required
                 min={0}
-                step={500}
+                step={1}
                 value={price}
                 onChange={(e) => setPrice(Number(e.target.value))}
                 className="w-full px-3.5 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-base font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"

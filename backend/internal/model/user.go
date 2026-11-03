@@ -61,6 +61,7 @@ type CreateUserRequest struct {
 
 type UpdateUserRequest struct {
 	Name     *string `json:"name,omitempty"`
+	Email    *string `json:"email,omitempty"`
 	Role     *string `json:"role,omitempty"`
 	IsActive *bool   `json:"is_active,omitempty"`
 	Password *string `json:"password,omitempty"`

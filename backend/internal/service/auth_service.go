@@ -169,6 +169,14 @@ func (s *authService) UpdateUser(ctx context.Context, id uuid.UUID, req model.Up
 		return nil, err
 	}
 
+	if req.Email != nil && *req.Email != "" && *req.Email != user.Email {
+		existing, err := s.userRepo.GetByEmail(ctx, *req.Email)
+		if err == nil && existing != nil && existing.ID != user.ID {
+			return nil, errors.New("user with this email already exists")
+		}
+		user.Email = *req.Email
+	}
+
 	if req.Name != nil && *req.Name != "" {
 		user.Name = *req.Name
 	}
@@ -182,6 +190,9 @@ func (s *authService) UpdateUser(ctx context.Context, id uuid.UUID, req model.Up
 		user.IsActive = *req.IsActive
 	}
 	if req.Password != nil && *req.Password != "" {
+		if len(*req.Password) < 6 {
+			return nil, errors.New("password must be at least 6 characters")
+		}
 		hash, err := bcrypt.GenerateFromPassword([]byte(*req.Password), 12)
 		if err != nil {
 			return nil, fmt.Errorf("failed to hash password: %w", err)

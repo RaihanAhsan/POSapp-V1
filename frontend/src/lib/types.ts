@@ -13,7 +13,7 @@ export interface Product {
   id: string;
   sku: string;
   name: string;
-  price: number; // In smallest monetary unit (IDR / cents)
+  price: number; // In monetary units (USD $)
   stock: number;
   is_active: boolean;
   created_at: string;

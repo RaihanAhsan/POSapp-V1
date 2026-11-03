@@ -4,19 +4,21 @@ import React, { useState, useEffect } from 'react';
 import { User, Role } from '@/lib/types';
 import { apiRequest } from '@/lib/api';
 import { formatDateTime } from '@/lib/formatters';
-import { Users, Plus, X, UserCheck, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Users, Plus, X, UserCheck, ShieldCheck, AlertCircle, Edit2 } from 'lucide-react';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Create User Modal
+  // User Modal (Create & Edit)
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<Role>('staff');
+  const [isActive, setIsActive] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
 
@@ -41,33 +43,94 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, []);
 
-  const handleCreateUser = async (e: React.FormEvent) => {
+  const handleOpenCreateModal = () => {
+    setEditingUser(null);
+    setName('');
+    setEmail('');
+    setPassword('');
+    setRole('staff');
+    setIsActive(true);
+    setModalError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (user: User) => {
+    setEditingUser(user);
+    setName(user.name);
+    setEmail(user.email);
+    setPassword('');
+    setRole(user.role);
+    setIsActive(user.is_active);
+    setModalError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setModalError(null);
     setIsSaving(true);
 
     try {
-      await apiRequest<User>('/users', {
-        method: 'POST',
-        body: JSON.stringify({
-          name,
-          email,
-          password,
+      if (editingUser) {
+        // Update existing user (name, email, role, status, optional new password)
+        const payload: {
+          name: string;
+          email: string;
+          role: Role;
+          is_active: boolean;
+          password?: string;
+        } = {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
           role,
-        }),
-      });
+          is_active: isActive,
+        };
+
+        if (password.trim() !== '') {
+          if (password.length < 6) {
+            setModalError('New password must be at least 6 characters long.');
+            setIsSaving(false);
+            return;
+          }
+          payload.password = password;
+        }
+
+        await apiRequest<User>(`/users/${editingUser.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        });
+      } else {
+        // Create new user (password is required)
+        if (!password || password.length < 6) {
+          setModalError('Password is required and must be at least 6 characters long.');
+          setIsSaving(false);
+          return;
+        }
+
+        await apiRequest<User>('/users', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password,
+            role,
+          }),
+        });
+      }
 
       setIsModalOpen(false);
+      setEditingUser(null);
       setName('');
       setEmail('');
       setPassword('');
       setRole('staff');
+      setIsActive(true);
       fetchUsers();
     } catch (err: unknown) {
       if (err instanceof Error) {
         setModalError(err.message);
       } else {
-        setModalError('Failed to create user account.');
+        setModalError(editingUser ? 'Failed to update user profile.' : 'Failed to create user account.');
       }
     } finally {
       setIsSaving(false);
@@ -100,16 +163,13 @@ export default function AdminUsersPage() {
             <span>User & Cashier Management</span>
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            Manage staff accounts, assign administrative roles, and activate or deactivate system logins.
+            Manage staff accounts, assign administrative roles, edit login details, or activate/deactivate accounts.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={() => {
-            setModalError(null);
-            setIsModalOpen(true);
-          }}
+          onClick={handleOpenCreateModal}
           className="w-full sm:w-auto flex items-center justify-center min-h-[44px] px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition cursor-pointer"
         >
           <Plus className="h-4 w-4 mr-1.5" />
@@ -175,17 +235,27 @@ export default function AdminUsersPage() {
                     Created: {formatDateTime(u.created_at)}
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleToggleStatus(u)}
-                    className={`w-full flex items-center justify-center min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                      u.is_active
-                        ? 'bg-slate-800 hover:bg-rose-950/60 text-slate-300 hover:text-rose-400 border border-slate-700/80'
-                        : 'bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/80'
-                    }`}
-                  >
-                    {u.is_active ? 'Deactivate Account' : 'Activate Account'}
-                  </button>
+                  <div className="flex items-center space-x-2 pt-1 border-t border-slate-800/80">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditModal(u)}
+                      className="flex-1 flex items-center justify-center min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 text-xs font-semibold border border-slate-700/80 active:bg-slate-700 transition cursor-pointer"
+                    >
+                      <Edit2 className="h-4 w-4 mr-1.5" />
+                      <span>Edit Details</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(u)}
+                      className={`flex-1 flex items-center justify-center min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+                        u.is_active
+                          ? 'bg-slate-800 hover:bg-rose-950/60 text-slate-300 hover:text-rose-400 border-slate-700/80'
+                          : 'bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border-emerald-800/80'
+                      }`}
+                    >
+                      {u.is_active ? 'Deactivate' : 'Activate'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -200,7 +270,7 @@ export default function AdminUsersPage() {
                     <th className="px-6 py-4">Role</th>
                     <th className="px-6 py-4">Status</th>
                     <th className="px-6 py-4">Date Created</th>
-                    <th className="px-6 py-4 text-center">Action</th>
+                    <th className="px-6 py-4 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
@@ -239,17 +309,27 @@ export default function AdminUsersPage() {
                         {formatDateTime(u.created_at)}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleStatus(u)}
-                          className={`flex items-center justify-center min-h-[44px] px-3.5 py-1.5 rounded-lg text-xs font-semibold transition mx-auto cursor-pointer ${
-                            u.is_active
-                              ? 'bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400'
-                              : 'bg-emerald-950 hover:bg-emerald-900 text-emerald-400'
-                          }`}
-                        >
-                          {u.is_active ? 'Deactivate' : 'Activate'}
-                        </button>
+                        <div className="flex items-center justify-center space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditModal(u)}
+                            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/70 transition cursor-pointer"
+                            title="Edit User (Name, Email, Password, Role)"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(u)}
+                            className={`flex items-center justify-center min-h-[44px] px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                              u.is_active
+                                ? 'bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700/70'
+                                : 'bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/80'
+                            }`}
+                          >
+                            {u.is_active ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -260,7 +340,7 @@ export default function AdminUsersPage() {
         )}
       </div>
 
-      {/* Create User Modal (Responsive Fullscreen on Mobile) */}
+      {/* User Modal (Create & Edit) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           {/* Desktop Backdrop */}
@@ -273,7 +353,9 @@ export default function AdminUsersPage() {
           <div className="relative z-10 bg-slate-900 border-0 sm:border border-slate-800 rounded-none sm:rounded-2xl w-full min-h-screen sm:min-h-0 sm:max-w-md flex flex-col shadow-2xl overflow-hidden my-auto">
             {/* Sticky Header */}
             <div className="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md px-4 sm:px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-              <h3 className="text-base sm:text-lg font-bold text-white">Create New User</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white">
+                {editingUser ? 'Edit User Details' : 'Create New User'}
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
@@ -285,7 +367,7 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Scrollable Form Body */}
-            <form onSubmit={handleCreateUser} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+            <form onSubmit={handleSaveUser} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
               {modalError && (
                 <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 rounded-xl text-xs sm:text-sm">
                   {modalError}
@@ -324,17 +406,22 @@ export default function AdminUsersPage() {
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Password
+                  {editingUser ? 'New Password (Optional)' : 'Password'}
                 </label>
                 <input
                   type="password"
-                  required
-                  autoComplete="new-password"
-                  placeholder="Minimum 6 characters"
+                  required={!editingUser}
+                  autoComplete={editingUser ? 'new-password' : 'new-password'}
+                  placeholder={editingUser ? 'Leave blank to keep existing password' : 'Minimum 6 characters'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3.5 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px]"
                 />
+                {editingUser && (
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Leave empty if you do not want to modify this user's password.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -350,6 +437,22 @@ export default function AdminUsersPage() {
                   <option value="admin">Admin (Owner - Full System Access)</option>
                 </select>
               </div>
+
+              {/* Active Status Toggle when Editing */}
+              {editingUser && (
+                <div className="flex items-center space-x-3 pt-2">
+                  <input
+                    type="checkbox"
+                    id="userIsActive"
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                    className="h-5 w-5 rounded border-slate-700 bg-slate-800 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <label htmlFor="userIsActive" className="text-sm text-slate-300 font-semibold cursor-pointer select-none">
+                    Account Active (Allow Login Access)
+                  </label>
+                </div>
+              )}
 
               {/* Sticky Actions in Modal Footer */}
               <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur-md pt-4 pb-2 border-t border-slate-800 flex space-x-3">
@@ -369,7 +472,7 @@ export default function AdminUsersPage() {
                   {isSaving ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    <span>Create User</span>
+                    <span>{editingUser ? 'Save Changes' : 'Create User'}</span>
                   )}
                 </button>
               </div>

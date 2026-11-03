@@ -35,9 +35,10 @@ export default function PaymentModal({
 
   const quickCashOptions = [
     { label: 'Exact', value: totalAmount },
-    { label: 'Rp 20.000', value: 20000 },
-    { label: 'Rp 50.000', value: 50000 },
-    { label: 'Rp 100.000', value: 100000 },
+    { label: '$10', value: 10 },
+    { label: '$20', value: 20 },
+    { label: '$50', value: 50 },
+    { label: '$100', value: 100 },
   ].filter((opt) => opt.value >= totalAmount);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,7 +145,7 @@ export default function PaymentModal({
                 }`}
               >
                 <QrCode className="h-5 w-5 mb-1 text-teal-400" />
-                <span>QRIS</span>
+                <span>QR / Digital</span>
               </button>
             </div>
           </div>
@@ -154,13 +155,13 @@ export default function PaymentModal({
             <div className="space-y-4 pt-3 border-t border-slate-800">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-                  Cash Received (IDR)
+                  Cash Received ($ USD)
                 </label>
                 <input
                   type="number"
                   inputMode="numeric"
                   min={totalAmount}
-                  step={1000}
+                  step={1}
                   value={cashReceived || ''}
                   onChange={(e) => setCashReceived(Number(e.target.value))}
                   className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-xl font-black tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[50px]"

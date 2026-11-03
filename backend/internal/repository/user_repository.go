@@ -35,7 +35,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*model.U
 	query := `
 		SELECT id, email, password_hash, name, role, is_active, created_at, updated_at
 		FROM users
-		WHERE email = $1 AND is_active = TRUE
+		WHERE email = $1
 	`
 	row := r.db.QueryRowContext(ctx, query, email)
 
@@ -121,13 +121,14 @@ func (r *userRepository) Create(ctx context.Context, user *model.User) error {
 func (r *userRepository) Update(ctx context.Context, user *model.User) error {
 	query := `
 		UPDATE users
-		SET name = $1, role = $2, is_active = $3, password_hash = $4, updated_at = NOW()
-		WHERE id = $5
+		SET email = $1, name = $2, role = $3, is_active = $4, password_hash = $5, updated_at = NOW()
+		WHERE id = $6
 		RETURNING updated_at
 	`
 	err := r.db.QueryRowContext(
 		ctx,
 		query,
+		user.Email,
 		user.Name,
 		user.Role,
 		user.IsActive,

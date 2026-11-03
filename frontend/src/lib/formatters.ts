@@ -1,15 +1,16 @@
 export function formatCurrency(amount: number | bigint): string {
-  return new Intl.NumberFormat('id-ID', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 
 export function formatDateTime(dateStr: string): string {
   try {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('id-ID', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -25,7 +26,7 @@ export function formatDateTime(dateStr: string): string {
 export function formatDateOnly(dateStr: string): string {
   try {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('id-ID', {
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
