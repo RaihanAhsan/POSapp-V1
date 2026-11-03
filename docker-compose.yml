@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: kasirku_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: kasirku
+      POSTGRES_PASSWORD: kasirku_password
+      POSTGRES_DB: kasirku_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - kasirku_pgdata:/var/lib/postgresql/data
+      - ./database/migrations/000001_init_schema.up.sql:/docker-entrypoint-initdb.d/01_init.sql
+      - ./database/seeds/001_seed_initial_data.sql:/docker-entrypoint-initdb.d/02_seeds.sql
+    networks:
+      - kasirku_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kasirku_backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      DATABASE_URL: "postgres://kasirku:kasirku_password@db:5432/kasirku_db?sslmode=disable"
+      DB_MAX_OPEN_CONNS: "10"
+      DB_MAX_IDLE_CONNS: "5"
+      JWT_SECRET: "kasirku-super-secret-jwt-key-minimum-32-chars-long!"
+      JWT_EXPIRATION_HOURS: "8"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001"
+    depends_on:
+      - db
+    networks:
+      - kasirku_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kasirku_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:8080/api"
+    depends_on:
+      - backend
+    networks:
+      - kasirku_network
+
+volumes:
+  kasirku_pgdata:
+
+networks:
+  kasirku_network:
+    driver: bridge
